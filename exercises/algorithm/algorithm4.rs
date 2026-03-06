@@ -3,7 +3,7 @@
 	This problem requires you to implement a basic interface for a binary tree
 */
 
-//I AM NOT DONE
+
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
@@ -50,13 +50,25 @@ where
 
     // Insert a value into the BST
     fn insert(&mut self, value: T) {
-        //TODO
+        if let Some(node) = &mut self.root {
+            node.insert(value);
+        } else {
+            self.root = Some(Box::new(TreeNode::new(value)));
+        }
     }
 
     // Search for a value in the BST
     fn search(&self, value: T) -> bool {
-        //TODO
-        true
+        let mut current = &self.root;
+        while let Some(node) = current {
+            match value.cmp(&node.value) {
+                Ordering::Equal => return true,             
+                Ordering::Less => current = &node.left,     
+                Ordering::Greater => current = &node.right, 
+            }
+        }
+        
+        false
     }
 }
 
@@ -66,7 +78,26 @@ where
 {
     // Insert a node into the tree
     fn insert(&mut self, value: T) {
-        //TODO
+        match value.cmp(&self.value) {
+            Ordering::Less => {
+                if let Some(node) = &mut self.left {
+                    node.insert(value);
+                } else {
+                    self.left = Some(Box::new(TreeNode::new(value))); // 左子树为空，直接把新节点挂在这里
+                }
+            }
+            Ordering::Greater => {
+                if let Some(node) = &mut self.right {
+                    node.insert(value); 
+                } else {
+                    self.right = Some(Box::new(TreeNode::new(value))); // 右子树为空，直接把新节点挂在这里
+                }
+            }
+            Ordering::Equal => {
+                // 根据测试用例 `test_insert_duplicate` 的要求，
+                // 如果插入的值已经存在，我们不需要做任何操作（忽略重复元素）。
+            }
+        }
     }
 }
 

@@ -2,7 +2,7 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -69,15 +69,67 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
+	pub fn merge(mut list_a: LinkedList<T>, mut list_b: LinkedList<T>) -> Self 
+    where 
+        T: PartialOrd 
+    {
+        let mut new_list = Self {
+            length: list_a.length + list_b.length,
             start: None,
             end: None,
+        };
+
+        let mut a = list_a.start;
+        let mut b = list_b.start;
+
+        while let (Some(node_a), Some(node_b)) = (a, b) {
+            unsafe {
+                let next_node;
+                
+                if (*node_a.as_ptr()).val <= (*node_b.as_ptr()).val {
+                    next_node = node_a;
+                    a = (*node_a.as_ptr()).next; 
+                } else {
+                    next_node = node_b;
+                    b = (*node_b.as_ptr()).next;
+                }
+
+                (*next_node.as_ptr()).next = None;
+
+                match new_list.end {
+                    None => new_list.start = Some(next_node),
+                    Some(end_ptr) => (*end_ptr.as_ptr()).next = Some(next_node),
+                }
+                new_list.end = Some(next_node);
+            }
         }
-	}
+
+        if let Some(node_a) = a {
+            match new_list.end {
+                None => new_list.start = Some(node_a),
+                Some(end_ptr) => unsafe { (*end_ptr.as_ptr()).next = Some(node_a) },
+            }
+            new_list.end = list_a.end;
+        }
+
+        if let Some(node_b) = b {
+            match new_list.end {
+                None => new_list.start = Some(node_b),
+                Some(end_ptr) => unsafe { (*end_ptr.as_ptr()).next = Some(node_b) },
+            }
+            new_list.end = list_b.end;
+        }
+
+        list_a.start = None;
+        list_a.end = None;
+        list_a.length = 0;
+
+        list_b.start = None;
+        list_b.end = None;
+        list_b.length = 0;
+
+        new_list
+    }
 }
 
 impl<T> Display for LinkedList<T>
